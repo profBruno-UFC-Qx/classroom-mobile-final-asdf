@@ -1,5 +1,6 @@
 package com.cofifinance.mobile.ui.home.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,16 +10,27 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -37,6 +49,18 @@ fun HomeScreen(
     vm: HomeViewModel = hiltViewModel(),
 ) {
     val state by vm.ui.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        vm.snackbarEvents.collect { name ->
+            val result = snackbarHostState.showSnackbar(
+                message = "\"$name\" deleted",
+                actionLabel = "Undo",
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) vm.undoDelete()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -47,8 +71,11 @@ fun HomeScreen(
                 Icon(Icons.Default.Add, contentDescription = "Add spending")
             }
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        Box(
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = vm::refresh,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
@@ -57,7 +84,7 @@ fun HomeScreen(
                 state.isLoading && state.spendings.isEmpty() -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                state.spendings.isEmpty() -> {
+                state.visibleSpendings.isEmpty() -> {
                     Text(
                         text = "No spendings yet",
                         modifier = Modifier.align(Alignment.Center),
@@ -71,11 +98,39 @@ fun HomeScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(state.spendings, key = { it.id }) { spending ->
-                            SpendingItem(
-                                spending = spending,
-                                onClick = { onNavigateToEdit(spending.id) },
+                        items(state.visibleSpendings, key = { it.id }) { spending ->
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                confirmValueChange = { value ->
+                                    if (value == SwipeToDismissBoxValue.EndToStart) {
+                                        vm.deleteSpending(spending.id)
+                                        true
+                                    } else false
+                                }
                             )
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                enableDismissFromStartToEnd = false,
+                                backgroundContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(MaterialTheme.colorScheme.error),
+                                        contentAlignment = Alignment.CenterEnd,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete",
+                                            tint = MaterialTheme.colorScheme.onError,
+                                            modifier = Modifier.padding(end = 24.dp),
+                                        )
+                                    }
+                                },
+                            ) {
+                                SpendingItem(
+                                    spending = spending,
+                                    onClick = { onNavigateToEdit(spending.id) },
+                                )
+                            }
                         }
                     }
                 }
