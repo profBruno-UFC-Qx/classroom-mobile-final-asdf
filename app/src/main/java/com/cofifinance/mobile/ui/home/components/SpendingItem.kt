@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cofifinance.mobile.data.local.entity.SpendingEntity
 import java.util.Locale
+import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun SpendingItem(spending: SpendingEntity, onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -30,7 +31,7 @@ fun SpendingItem(spending: SpendingEntity, onClick: () -> Unit, modifier: Modifi
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = String.format(Locale.getDefault(), "$%.2f", spending.price),
+                    text = String.format(LocalLocale.current.platformLocale, "$%.2f", spending.price),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
