@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -33,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -84,7 +86,7 @@ fun HomeScreen(
                 state.isLoading && state.spendings.isEmpty() -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                state.visibleSpendings.isEmpty() -> {
+                state.spendings.isEmpty() -> {
                     Text(
                         text = "No spendings yet",
                         modifier = Modifier.align(Alignment.Center),
@@ -98,7 +100,7 @@ fun HomeScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(state.visibleSpendings, key = { it.id }) { spending ->
+                        items(state.spendings, key = { it.id }) { spending ->
                             val dismissState = rememberSwipeToDismissBoxState(
                                 confirmValueChange = { value ->
                                     if (value == SwipeToDismissBoxValue.EndToStart) {
@@ -107,6 +109,15 @@ fun HomeScreen(
                                     } else false
                                 }
                             )
+
+                            // When undo is requested, slide the card back without
+                            // removing/re-inserting the item (which would reset keyed state).
+                            LaunchedEffect(spending.id) {
+                                vm.undoEvents.collect { id ->
+                                    if (id == spending.id) dismissState.reset()
+                                }
+                            }
+
                             SwipeToDismissBox(
                                 state = dismissState,
                                 enableDismissFromStartToEnd = false,
@@ -114,6 +125,7 @@ fun HomeScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
+                                            .clip(CardDefaults.shape)
                                             .background(MaterialTheme.colorScheme.error),
                                         contentAlignment = Alignment.CenterEnd,
                                     ) {
