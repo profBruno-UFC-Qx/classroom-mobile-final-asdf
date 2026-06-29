@@ -1,0 +1,5 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.CofiFinanceMobile" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.CofiFinanceMobile" parent="Base.Theme.CofiFinanceMobile" />
+</resources>
