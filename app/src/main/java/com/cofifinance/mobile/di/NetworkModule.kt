@@ -1,6 +1,7 @@
 package com.cofifinance.mobile.di
 
 import com.cofifinance.mobile.data.remote.api.AuthApiService
+import com.cofifinance.mobile.data.remote.api.SpendingApiService
 import com.cofifinance.mobile.data.remote.network.AuthInterceptor
 import com.cofifinance.mobile.data.remote.network.TokenAuthenticator
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -58,4 +59,9 @@ object NetworkModule {
     @Singleton
     fun provideAuthApi(retrofit: Retrofit): AuthApiService =
         retrofit.create(AuthApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideSpendingApi(retrofit: Retrofit): SpendingApiService =
+        retrofit.create(SpendingApiService::class.java)
 }
