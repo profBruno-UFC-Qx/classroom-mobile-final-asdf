@@ -27,6 +27,9 @@ class HomeViewModel @Inject constructor(
     private val _snackbarEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val snackbarEvents: SharedFlow<String> = _snackbarEvents.asSharedFlow()
 
+    private val _undoEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val undoEvents: SharedFlow<String> = _undoEvents.asSharedFlow()
+
     private var pendingDeleteJob: Job? = null
 
     init {
@@ -67,6 +70,8 @@ class HomeViewModel @Inject constructor(
     fun undoDelete() {
         pendingDeleteJob?.cancel()
         pendingDeleteJob = null
+        val id = _ui.value.pendingDeleteId ?: return
+        _undoEvents.tryEmit(id)
         _ui.update { it.copy(pendingDeleteId = null) }
     }
 }
