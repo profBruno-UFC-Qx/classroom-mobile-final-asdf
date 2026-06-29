@@ -8,8 +8,4 @@ data class HomeUiState(
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val error: String? = null,
-) {
-    val visibleSpendings: List<SpendingEntity>
-        get() = if (pendingDeleteId == null) spendings
-                else spendings.filter { it.id != pendingDeleteId }
-}
+)
