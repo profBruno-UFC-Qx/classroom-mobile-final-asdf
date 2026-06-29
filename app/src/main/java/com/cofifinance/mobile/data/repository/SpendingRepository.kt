@@ -77,6 +77,8 @@ class SpendingRepository @Inject constructor(
         sync()
     }
 
+    suspend fun getSpendingById(id: String): SpendingEntity? = dao.getById(id)
+
     suspend fun deleteSpending(id: String) {
         dao.updateSyncStatus(id, SyncStatus.PENDING_DELETE)
         sync()
