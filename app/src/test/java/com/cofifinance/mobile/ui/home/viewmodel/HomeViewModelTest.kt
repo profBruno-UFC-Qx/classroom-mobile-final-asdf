@@ -183,17 +183,17 @@ class HomeViewModelTest {
     // ── deleteSpending / undoDelete ───────────────────────────────────────────
 
     @Test
-    fun `deleteSpending hides item from visibleSpendings immediately`() =
+    fun `deleteSpending keeps item in spendings list`() =
         runTest(mainDispatcherRule.dispatcher.scheduler) {
             api.listHandler = { ApiEnvelope(listOf(dto("s1"))) }
             val vm = HomeViewModel(repo)
             advanceUntilIdle()
-            assertEquals(1, vm.ui.value.visibleSpendings.size)
+            assertEquals(1, vm.ui.value.spendings.size)
 
             vm.deleteSpending("s1")
             runCurrent()
 
-            assertTrue(vm.ui.value.visibleSpendings.isEmpty())
+            assertEquals(1, vm.ui.value.spendings.size)
             assertEquals("s1", vm.ui.value.pendingDeleteId)
         }
 
@@ -216,20 +216,23 @@ class HomeViewModelTest {
         }
 
     @Test
-    fun `undoDelete restores item in visibleSpendings`() =
+    fun `undoDelete emits undo event with spending id`() =
         runTest(mainDispatcherRule.dispatcher.scheduler) {
             api.listHandler = { ApiEnvelope(listOf(dto("s1"))) }
             val vm = HomeViewModel(repo)
             advanceUntilIdle()
-
             vm.deleteSpending("s1")
             runCurrent()
-            assertTrue(vm.ui.value.visibleSpendings.isEmpty())
+
+            var undoneId: String? = null
+            val job = launch { undoneId = vm.undoEvents.first() }
+            runCurrent() // activate collector before emitting
 
             vm.undoDelete()
             runCurrent()
+            job.cancel()
 
-            assertEquals(1, vm.ui.value.visibleSpendings.size)
+            assertEquals("s1", undoneId)
             assertNull(vm.ui.value.pendingDeleteId)
         }
 
