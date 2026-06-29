@@ -7,8 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,12 +31,21 @@ import com.cofifinance.mobile.ui.home.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(vm: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(
+    onNavigateToCreate: () -> Unit,
+    onNavigateToEdit: (String) -> Unit,
+    vm: HomeViewModel = hiltViewModel(),
+) {
     val state by vm.ui.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(stringResource(R.string.app_name)) })
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onNavigateToCreate) {
+                Icon(Icons.Default.Add, contentDescription = "Add spending")
+            }
         },
     ) { padding ->
         Box(
@@ -59,7 +72,10 @@ fun HomeScreen(vm: HomeViewModel = hiltViewModel()) {
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(state.spendings, key = { it.id }) { spending ->
-                            SpendingItem(spending = spending)
+                            SpendingItem(
+                                spending = spending,
+                                onClick = { onNavigateToEdit(spending.id) },
+                            )
                         }
                     }
                 }

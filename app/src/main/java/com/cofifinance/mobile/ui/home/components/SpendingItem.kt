@@ -16,8 +16,8 @@ import com.cofifinance.mobile.data.local.entity.SpendingEntity
 import java.util.Locale
 
 @Composable
-fun SpendingItem(spending: SpendingEntity, modifier: Modifier = Modifier) {
-    Card(modifier = modifier.fillMaxWidth()) {
+fun SpendingItem(spending: SpendingEntity, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Card(onClick = onClick, modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

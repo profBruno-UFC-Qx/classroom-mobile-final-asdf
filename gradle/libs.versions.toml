@@ -34,6 +34,8 @@ androidx-compose-ui-tooling-preview      = { module = "androidx.compose.ui:ui-to
 androidx-compose-ui-test-junit4          = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-compose-ui-test-manifest        = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-compose-material3               = { module = "androidx.compose.material3:material3" }
+androidx-compose-material-icons-core     = { module = "androidx.compose.material:material-icons-core" }
+androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-lifecycle-viewmodel-compose     = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose       = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-ktx           = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }

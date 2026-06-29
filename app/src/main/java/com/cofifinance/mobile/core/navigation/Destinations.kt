@@ -13,4 +13,4 @@ data object Register : NavKey
 data object Home : NavKey
 
 @Serializable
-data object Spending : NavKey
+data class Spending(val id: String? = null) : NavKey
