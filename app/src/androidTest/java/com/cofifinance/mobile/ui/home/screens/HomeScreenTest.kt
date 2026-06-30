@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
+import androidx.compose.ui.test.swipeLeft
 import com.cofifinance.mobile.data.local.entity.SpendingEntity
 import com.cofifinance.mobile.data.local.entity.SyncStatus
 import com.cofifinance.mobile.data.remote.dto.ApiEnvelope
@@ -164,6 +165,39 @@ class HomeScreenTest {
             composeRule.onAllNodesWithText("New Item").fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithText("New Item").assertIsDisplayed()
+    }
+
+    // ── Swipe-to-delete + undo ────────────────────────────────────────────────
+
+    // Regression: previously, after one delete+undo cycle the second swipe on
+    // the SAME row did nothing because the SwipeToDismissBoxState retained
+    // stale internal anchored-draggable state.
+    @Test
+    fun delete_undo_delete_undo_works_on_the_same_row() {
+        val api = FakeSpendingApiService().apply {
+            listHandler = { ApiEnvelope(listOf(dto("s1", "Coffee"))) }
+        }
+        val vm = vm(api = api)
+
+        composeRule.setContent {
+            HomeScreen(onNavigateToCreate = {}, onNavigateToEdit = {}, vm = vm)
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Coffee").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // ── First cycle: delete → undo
+        composeRule.onNodeWithText("Coffee").performTouchInput { swipeLeft() }
+        composeRule.waitUntil(5_000) { vm.ui.value.pendingDeleteId == "s1" }
+        composeRule.onNodeWithText("Undo").performClick()
+        composeRule.waitUntil(5_000) { vm.ui.value.pendingDeleteId == null }
+
+        // ── Second cycle on the SAME row: this is the regression
+        composeRule.onNodeWithText("Coffee").performTouchInput { swipeLeft() }
+        composeRule.waitUntil(5_000) { vm.ui.value.pendingDeleteId == "s1" }
+        composeRule.onNodeWithText("Undo").performClick()
+        composeRule.waitUntil(5_000) { vm.ui.value.pendingDeleteId == null }
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
