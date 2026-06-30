@@ -1,45 +1,75 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/AR7CADm8)
 [![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=23362550)
-# :checkered_flag: NOME DO PROJETO
 
-Breve descrição do que o seu projeto faz.
+# :checkered_flag: COFI - Controle Financeiro
+
+Aplicativo Android para controle financeiro pessoal, desenvolvido como complemento mobile à aplicação web já existente.
 
 ## :technologist: Membros da equipe
 
-Matrícula, nome e curso dos participantes.
+Lucas Almeida - 495 000
 
 ## :bulb: Objetivo Geral
-Descrever o objetivo de geral do projeto
+
+Desenvolver o aplicativo Android do COFI — Controle Financeiro, como complemento à aplicação web já existente. Este projeto foi desenvolvido como parte da disciplina de desenvolvimento mobile.
 
 ## :eyes: Público-Alvo
-Público-alvo do projeto
+
+Pessoas que desejam organizar e acompanhar suas finanças pessoais de forma simples e eficiente.
 
 ## :star2: Impacto Esperado
-Descreva o impacto esperado do projeto em relação ao público alvo
 
+Auxiliar o usuário a ter maior controle e consciência sobre seus gastos, contribuindo para uma melhor saúde financeira.
 
-## :triangular_flag_on_post:	 Principais funcionalidades da aplicação
+## :triangular_flag_on_post: Principais funcionalidades da aplicação
 
-Descreva ou liste brevemente as principais funcionalidades da aplicação que será desenvolvida. 
+- _Funcionalidades do usuário não logado_
+  - Usuário pode criar conta
+- _Funcionalidades do usuário logado_
+  - Listar as contas
+  - Separar as contas por cartão de crédito
+  - Ver o fluxo de caixa da pessoa
+  - Filtrar os gastos de acordo com categoria e modo de pagamento
 
 ---
 
 > [!WARNING]
 > Daqui em diante o README.md só deve ser preenchido no momento da entrega final.
 
-##  Tecnologias: 
-Liste aqui as tecnologias e bibliotecas que foram utilizadas no projeto.
+## Tecnologias:
+
+- Kotlin 2.4
+- Jetpack Compose (BOM 2026.06)
+- Navigation 3
+- Hilt 2.60 (injeção de dependência)
+- Room 2.8 (persistência local)
+- Retrofit 3 + OkHttp 5 (networking)
+- DataStore Preferences (armazenamento de tokens)
+- Junit (Testes unitários e Testes instrumentais)
 
 ---
 
 ## Instruções para Execução
-[Inclua instruções claras sobre como rodar o projeto localmente. Isso é crucial para que você possa testá-lo nas próximas entregas. **Somente caso haja alguma coisa diferente do usual**
+
+**Backend:**
 
 ```bash
-# Clone o repositório
-git clone [https://docs.github.com/pt/repositories/creating-and-managing-repositories/about-repositories](https://docs.github.com/pt/repositories/creating-and-managing-repositories/about-repositories)
+cd backend
+make dev
+```
 
-# Navegue para o diretório
-cd [nome-do-repositorio]
+**Frontend:**
 
-# Siga as instruções específicas para a sua tecnologia...
+```bash
+cd frontend
+npm start
+```
+
+**Mobile:**
+
+Abra a pasta `classroom-mobile-final-asdf` no Android Studio. Aguarde o Gradle Sync baixar as dependências (**File → Sync Project with Gradle Files**). Com um dispositivo ou emulador conectado, clique em **Run** para instalar e executar o app.
+
+**Usuário Teste**
+
+- Email: `lucas@mail.com`
+- Password: `asdfasdf`
