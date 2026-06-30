@@ -110,11 +110,15 @@ fun HomeScreen(
                                 }
                             )
 
-                            // When undo is requested, slide the card back without
-                            // removing/re-inserting the item (which would reset keyed state).
-                            LaunchedEffect(spending.id) {
-                                vm.undoEvents.collect { id ->
-                                    if (id == spending.id) dismissState.reset()
+                            // Reset is keyed on the StateFlow transition (delete ↔ undo),
+                            // so each cycle gets a fresh coroutine that cannot be
+                            // permanently killed by a prior animation's CancellationException.
+                            val isDismissed = state.pendingDeleteId == spending.id
+                            LaunchedEffect(isDismissed) {
+                                if (!isDismissed &&
+                                    dismissState.currentValue != SwipeToDismissBoxValue.Settled
+                                ) {
+                                    dismissState.reset()
                                 }
                             }
 
