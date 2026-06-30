@@ -1,0 +1,49 @@
+<main class="home">
+  <div class="login-card">
+    <h1>{{ 'home.title' | translate }}</h1>
+    <p class="subtitle">
+      {{ (mode() === 'login' ? 'home.subtitleLogin' : 'home.subtitleSignup') | translate }}
+    </p>
+
+    <div class="tab-bar">
+      <button
+        type="button"
+        class="tab-btn tab-btn--left"
+        [class.active]="mode() === 'signup'"
+        (click)="setMode('signup')"
+        data-cy="tab-signup"
+      >
+        {{ 'home.tabs.signup' | translate }}
+      </button>
+      <button
+        type="button"
+        class="tab-btn tab-btn--right"
+        [class.active]="mode() === 'login'"
+        (click)="setMode('login')"
+        data-cy="tab-login"
+      >
+        {{ 'home.tabs.login' | translate }}
+      </button>
+    </div>
+
+    @if (mode() === 'login') {
+      <app-login-form
+        [isLoading]="isLoading()"
+        [error]="error()"
+        (loginSubmit)="onLoginSubmit($event)"
+      />
+    }
+    @if (mode() === 'signup') {
+      <app-signup-form
+        [isLoading]="isLoading()"
+        [error]="error()"
+        (signupSubmit)="onSignupSubmit($event)"
+      />
+    }
+  </div>
+</main>
+
+<app-email-verification-modal
+  [visible]="showVerificationModal()"
+  (close)="onVerificationModalClose()"
+/>

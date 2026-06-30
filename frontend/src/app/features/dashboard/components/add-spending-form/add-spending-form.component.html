@@ -1,0 +1,29 @@
+<form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <h3 class="form__title">{{ 'dashboard.addForm.title' | translate }}</h3>
+
+  <div class="form__fields">
+    <div class="field">
+      <label>{{ 'dashboard.addForm.name' | translate }}</label>
+      <input formControlName="name" type="text" maxlength="50" />
+    </div>
+
+    <div class="field">
+      <label>{{ 'dashboard.addForm.category' | translate }}</label>
+      <input formControlName="category" type="text" maxlength="50" />
+    </div>
+
+    <div class="field">
+      <label>{{ 'dashboard.addForm.price' | translate }}</label>
+      <input formControlName="price" type="number" step="0.01" min="0.01" />
+    </div>
+
+    <div class="field">
+      <label>{{ 'dashboard.addForm.observation' | translate }}</label>
+      <input formControlName="observation" type="text" maxlength="200" />
+    </div>
+  </div>
+
+  <button class="submit-btn" type="submit" data-cy="add-spending-submit" [disabled]="form.invalid || isSubmitting">
+    {{ isSubmitting ? ('dashboard.addForm.submitting' | translate) : ('dashboard.addForm.submit' | translate) }}
+  </button>
+</form>

@@ -1,0 +1,39 @@
+@use '../../../styles/tokens' as t;
+
+@mixin nav-styles {
+  .nav-list {
+    list-style: none;
+    margin: 0;
+    padding: t.$sp-4 0;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: t.$sp-3;
+    padding: t.$sp-3 t.$sp-4;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: t.$font-sm;
+    font-weight: 500;
+    border-radius: t.$radius-sm;
+    margin: 0 t.$sp-2;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      background: var(--bg-page);
+      color: var(--text-base);
+    }
+
+    &--active {
+      background: color-mix(in srgb, t.$color-primary 10%, transparent);
+      color: t.$color-primary;
+    }
+  }
+
+  .nav-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+  }
+}

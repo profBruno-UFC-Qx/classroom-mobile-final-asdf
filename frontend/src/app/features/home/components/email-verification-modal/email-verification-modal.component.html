@@ -1,0 +1,16 @@
+@if (visible) {
+  <div class="modal-backdrop" data-cy="verification-modal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h2 data-cy="verification-modal-title">{{ 'verification.modal.title' | translate }}</h2>
+      <p data-cy="verification-modal-message">{{ 'verification.modal.message' | translate }}</p>
+      <button
+        type="button"
+        class="btn-primary"
+        data-cy="verification-modal-action"
+        (click)="close.emit()"
+      >
+        {{ 'verification.modal.action' | translate }}
+      </button>
+    </div>
+  </div>
+}

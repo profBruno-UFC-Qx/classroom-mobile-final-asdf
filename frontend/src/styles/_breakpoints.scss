@@ -1,0 +1,13 @@
+// Mobile-first min-width breakpoints.
+// Default styles target mobile; use respond-to() to enhance for larger screens.
+$bp-sm: 480px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+
+@mixin respond-to($name) {
+  @if      $name == sm { @media (min-width: #{$bp-sm}) { @content; } }
+  @else if $name == md { @media (min-width: #{$bp-md}) { @content; } }
+  @else if $name == lg { @media (min-width: #{$bp-lg}) { @content; } }
+  @else if $name == xl { @media (min-width: #{$bp-xl}) { @content; } }
+}

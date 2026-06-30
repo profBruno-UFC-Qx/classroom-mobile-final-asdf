@@ -1,0 +1,32 @@
+@use '../../../styles/tokens' as t;
+@use '../../../styles/breakpoints' as bp;
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 30%);
+  z-index: 19;
+
+  &--visible {
+    display: block;
+  }
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 16rem;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  z-index: 20;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  padding-top: 5rem;
+
+  &--open {
+    transform: translateX(0);
+  }
+}

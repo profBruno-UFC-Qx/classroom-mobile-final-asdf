@@ -1,0 +1,20 @@
+<div class="chart-panel" data-cy="chart-panel">
+  <div class="chart-panel__main">
+    @if (chartType() === 'by-category') {
+      <app-spending-chart [spendings]="spendings" />
+    }
+    <div class="chart-panel__carousel">
+      @for (type of chartTypes; track type) {
+        <button
+          class="chart-panel__type-btn"
+          [class.chart-panel__type-btn--active]="chartType() === type"
+          type="button"
+          [attr.data-cy]="'chart-type-btn-' + type"
+          (click)="selectType(type)">
+          {{ chartTypeKey(type) | translate }}
+        </button>
+      }
+    </div>
+  </div>
+  <app-spending-summary [spendings]="spendings" />
+</div>

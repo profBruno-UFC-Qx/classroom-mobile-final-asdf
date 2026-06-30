@@ -1,0 +1,222 @@
+<div class="list-header">
+  <button class="add-btn" type="button" data-cy="add-spending-btn" (click)="openDraftRow()">
+    + {{ 'dashboard.table.addSpending' | translate }}
+  </button>
+</div>
+
+@if (localSpendings().length === 0 && !draftRow()) {
+  <p class="list-empty" data-cy="empty-state">{{ 'dashboard.empty' | translate }}</p>
+}
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th class="th--sortable" data-cy="sort-name" (click)="toggleSort('name')">
+          {{ 'dashboard.columns.name' | translate }}
+          @if (sortColumn() === 'name') {
+            <span class="sort-indicator" [class.sort-indicator--desc]="sortDirection() === 'desc'">&#9650;</span>
+          }
+        </th>
+        <th class="th--sortable" data-cy="sort-category" (click)="toggleSort('category')">
+          {{ 'dashboard.columns.category' | translate }}
+          @if (sortColumn() === 'category') {
+            <span class="sort-indicator" [class.sort-indicator--desc]="sortDirection() === 'desc'">&#9650;</span>
+          }
+        </th>
+        <th class="th--sortable" data-cy="sort-price" (click)="toggleSort('price')">
+          {{ 'dashboard.columns.price' | translate }}
+          @if (sortColumn() === 'price') {
+            <span class="sort-indicator" [class.sort-indicator--desc]="sortDirection() === 'desc'">&#9650;</span>
+          }
+        </th>
+        <th class="th--sortable" data-cy="sort-date" (click)="toggleSort('date')">
+          {{ 'dashboard.columns.date' | translate }}
+          @if (sortColumn() === 'date') {
+            <span class="sort-indicator" [class.sort-indicator--desc]="sortDirection() === 'desc'">&#9650;</span>
+          }
+        </th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody appTableNav (pastLastRow)="openDraftRow()">
+      @for (s of sortedSpendings(); track s.id) {
+        <tr data-cy="spending-row" [class.row--update-failed]="failedUpdateIds.includes(s.id)">
+          <td>
+            <input
+              class="cell-input"
+              data-cy="edit-name"
+              [attr.data-row-id]="s.id"
+              [attr.data-field]="'name'"
+              [value]="s.name"
+              maxlength="50"
+              (input)="onFieldInput(s.id, 'name', $event)"
+              (keydown)="onCellEscape($event, s, 'name')" />
+            @if (s.name.length >= 50) {
+              <span class="cell-warn" data-cy="name-max-warn">{{ 'dashboard.table.warn.maxLength' | translate }}</span>
+            }
+          </td>
+          <td>
+            <input
+              class="cell-input"
+              data-cy="edit-category"
+              [attr.data-row-id]="s.id"
+              [attr.data-field]="'category'"
+              [value]="s.category"
+              maxlength="50"
+              (input)="onFieldInput(s.id, 'category', $event)"
+              (keydown)="onCellEscape($event, s, 'category')" />
+            @if (s.category.length >= 50) {
+              <span class="cell-warn" data-cy="category-max-warn">{{ 'dashboard.table.warn.maxLength' | translate }}</span>
+            }
+          </td>
+          <td>
+            <div class="price-cell">
+              <span class="currency-symbol" aria-hidden="true">{{ 'currency.symbol' | translate }}</span>
+              <input
+                class="cell-input"
+                data-cy="edit-price"
+                type="number"
+                step="0.01"
+                [attr.data-row-id]="s.id"
+                [attr.data-field]="'price'"
+                [value]="s.price"
+                (input)="onFieldInput(s.id, 'price', $event)"
+                (keydown)="onCellEscape($event, s, 'price')" />
+            </div>
+          </td>
+          <td>
+            <input
+              class="cell-input"
+              data-cy="edit-date"
+              type="date"
+              [attr.data-row-id]="s.id"
+              [attr.data-field]="'date'"
+              [value]="formatDate(s.date)"
+              (input)="onFieldInput(s.id, 'date', $event)"
+              (keydown)="onCellEscape($event, s, 'date')" />
+            @if (!s.date) {
+              <span class="cell-warn" data-cy="date-required-warn">{{ 'dashboard.table.warn.dateRequired' | translate }}</span>
+            }
+          </td>
+          <td class="obs-cell">
+            <textarea
+              class="cell-input cell-input--obs"
+              data-cy="edit-observation"
+              [attr.data-row-id]="s.id"
+              [attr.data-field]="'observation'"
+              maxlength="200"
+              rows="1"
+              (input)="onObsInput(s.id, $event)"
+              (keydown)="onCellEscape($event, s, 'observation')">{{ s.observation ?? '' }}</textarea>
+          </td>
+          <td class="actions-cell">
+            @if (!s.id.startsWith('temp-')) {
+              <button
+                class="delete-btn"
+                type="button"
+                aria-label="Delete spending"
+                data-cy="delete-spending-btn"
+                (click)="onDeleteClick(s)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6l-1 14H6L5 6"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                  <path d="M9 6V4h6v2"></path>
+                </svg>
+              </button>
+            }
+          </td>
+        </tr>
+      }
+      @if (draftRow()) {
+        <tr data-cy="draft-row">
+          <td>
+            <input
+              class="cell-input"
+              data-cy="draft-name"
+              [class.cell-input--error]="draftSubmitAttempted() && !draftRow()!.name.trim()"
+              [value]="draftRow()!.name"
+              maxlength="50"
+              [placeholder]="'dashboard.columns.name' | translate"
+              (input)="onDraftFieldInput('name', $event)"
+              (keydown)="onDraftKeydown($event, 'name')" />
+            @if (draftSubmitAttempted() && !draftRow()!.name.trim()) {
+              <span class="cell-warn" data-cy="draft-name-required">{{ 'dashboard.table.warn.required' | translate }}</span>
+            }
+          </td>
+          <td>
+            <input
+              class="cell-input"
+              data-cy="draft-category"
+              [class.cell-input--error]="draftSubmitAttempted() && !draftRow()!.category.trim()"
+              [value]="draftRow()!.category"
+              maxlength="50"
+              [placeholder]="'dashboard.columns.category' | translate"
+              (input)="onDraftFieldInput('category', $event)"
+              (keydown)="onDraftKeydown($event, 'category')" />
+            @if (draftSubmitAttempted() && !draftRow()!.category.trim()) {
+              <span class="cell-warn" data-cy="draft-category-required">{{ 'dashboard.table.warn.required' | translate }}</span>
+            }
+          </td>
+          <td>
+            <div class="price-cell">
+              <span class="currency-symbol" aria-hidden="true">{{ 'currency.symbol' | translate }}</span>
+              <input
+                class="cell-input"
+                data-cy="draft-price"
+                type="number"
+                step="0.01"
+                [class.cell-input--error]="draftSubmitAttempted() && !draftRow()!.price"
+                [value]="draftRow()!.price"
+                (input)="onDraftFieldInput('price', $event)"
+                (keydown)="onDraftKeydown($event, 'price')" />
+              @if (draftSubmitAttempted() && !draftRow()!.price) {
+                <span class="cell-warn" data-cy="draft-price-required">{{ 'dashboard.table.warn.required' | translate }}</span>
+              }
+            </div>
+          </td>
+          <td>
+            <input
+              class="cell-input"
+              data-cy="draft-date"
+              type="date"
+              [value]="draftRow()!.date"
+              (input)="onDraftFieldInput('date', $event)"
+              (keydown)="onDraftKeydown($event, 'date')" />
+          </td>
+          <td class="obs-cell">
+            <textarea
+              class="cell-input cell-input--obs"
+              data-cy="draft-observation"
+              maxlength="200"
+              rows="1"
+              (input)="onDraftFieldInput('observation', $event)"
+              (keydown)="onDraftKeydown($event, 'observation')">{{ draftRow()!.observation }}</textarea>
+          </td>
+          <td class="actions-cell">
+            <button
+              class="save-btn"
+              type="button"
+              [attr.aria-label]="'dashboard.table.saveDraft' | translate"
+              data-cy="save-draft-btn"
+              [disabled]="!isDraftValid"
+              (click)="onSaveDraft()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="4 12 9 17 20 7"></polyline>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<div class="list-footer">
+  <button class="add-btn" type="button" data-cy="add-spending-btn-bottom" (click)="openDraftRow()">
+    + {{ 'dashboard.table.addSpending' | translate }}
+  </button>
+</div>

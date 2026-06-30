@@ -1,0 +1,70 @@
+@use '../../../../../styles/tokens' as t;
+
+.home {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-page);
+  padding: t.$sp-4;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 26.25rem;
+  background: var(--bg-surface);
+  border-radius: t.$radius-lg;
+  padding: t.$sp-10 t.$sp-8;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 10%),
+    0 2px 4px -2px rgb(0 0 0 / 10%);
+
+  h1 {
+    margin: 0 0 t.$sp-1;
+    font-size: t.$font-2xl;
+    font-weight: 700;
+    color: var(--text-base);
+  }
+
+  .subtitle {
+    margin: 0 0 t.$sp-6;
+    color: var(--text-subtle);
+    font-size: 0.9375rem;
+  }
+}
+
+.tab-bar {
+  display: flex;
+  margin-bottom: t.$sp-8;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.5rem t.$sp-4;
+  font-size: t.$font-base;
+  font-weight: 500;
+  border: 2px solid t.$color-primary;
+  background: transparent;
+  color: t.$color-primary;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &--left {
+    border-radius: t.$radius-md 0 0 t.$radius-md;
+    border-right-width: 1px;
+  }
+
+  &--right {
+    border-radius: 0 t.$radius-md t.$radius-md 0;
+    border-left-width: 1px;
+  }
+
+  &.active {
+    background: t.$color-primary;
+    color: t.$color-white;
+  }
+
+  &:hover:not(.active) {
+    background: t.$color-primary-ring;
+  }
+}

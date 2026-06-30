@@ -1,0 +1,18 @@
+<aside class="summary" data-cy="spending-summary">
+
+  <div class="summary__row">
+    <span class="summary__label" data-cy="summary-label">{{ 'dashboard.summary.total' | translate }}</span>
+    <span class="summary__total" data-cy="summary-total">{{ formatAmount(total) }}</span>
+  </div>
+
+  <div class="summary__list-wrapper">
+    <ul class="summary__list">
+      @for (item of byCategory; track item.category) {
+        <li class="summary__item" data-cy="summary-category-item">
+          <span class="summary__category" data-cy="summary-category-name">{{ item.category }}</span>
+          <span class="summary__amount" data-cy="summary-category-amount">{{ formatAmount(item.total) }}</span>
+        </li>
+      }
+    </ul>
+  </div>
+</aside>

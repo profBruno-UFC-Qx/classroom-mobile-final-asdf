@@ -1,0 +1,115 @@
+{
+  "home": {
+    "title": "CoFi Finance",
+    "subtitle": "Entre na sua conta",
+    "subtitleLogin": "Entre na sua conta",
+    "subtitleSignup": "Crie sua conta",
+    "tabs": {
+      "login": "Entrar",
+      "signup": "Cadastrar"
+    },
+    "form": {
+      "email": {
+        "label": "E-mail",
+        "placeholder": "voce@exemplo.com",
+        "required": "O e-mail é obrigatório.",
+        "invalid": "Insira um endereço de e-mail válido."
+      },
+      "password": {
+        "label": "Senha",
+        "required": "A senha é obrigatória.",
+        "minLength": "A senha deve ter pelo menos 8 caracteres."
+      },
+      "submit": "Entrar",
+      "submitting": "Entrando\u2026",
+      "error": "Falha no login. Por favor, tente novamente."
+    },
+    "signupForm": {
+      "confirmPassword": {
+        "label": "Confirmar Senha",
+        "required": "Por favor, confirme sua senha.",
+        "mismatch": "As senhas não coincidem."
+      },
+      "submit": "Criar conta",
+      "submitting": "Criando conta\u2026",
+      "error": "Falha no cadastro. Por favor, tente novamente."
+    }
+  },
+  "verification": {
+    "modal": {
+      "title": "Verifique sua caixa de entrada",
+      "message": "Enviamos um link de verificação para o seu e-mail. Clique nele para ativar sua conta.",
+      "action": "Ir para o login"
+    },
+    "emailVerified": {
+      "title": "E-mail verificado!",
+      "message": "Sua conta está ativa agora.",
+      "action": "Ir para o login"
+    }
+  },
+  "layout": {
+    "themeToggle": "Alternar tema",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "userMenu": {
+      "open": "Abrir menu do usuário",
+      "logout": "Sair"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "login": "Entrar"
+  },
+  "currency": {
+    "symbol": "R$"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "currentMonthTitle": "Gastos do Mês Atual",
+    "loading": "Carregando gastos\u2026",
+    "empty": "Nenhum gasto encontrado para este mês.",
+    "error": "Falha ao carregar gastos. Por favor, tente novamente.",
+    "columns": {
+      "name": "Nome",
+      "category": "Categoria",
+      "price": "Preço",
+      "date": "Data"
+    },
+    "addForm": {
+      "title": "Adicionar Gasto",
+      "name": "Nome",
+      "category": "Categoria",
+      "price": "Preço",
+      "observation": "Observação (opcional)",
+      "submit": "Adicionar",
+      "submitting": "Adicionando\u2026"
+    },
+    "chart": {
+      "title": "Gastos por Categoria",
+      "types": {
+        "byCategory": "Por Categoria"
+      }
+    },
+    "summary": {
+      "total": "Total"
+    },
+    "table": {
+      "warn": {
+        "maxLength": "Máximo de 50 caracteres",
+        "dateRequired": "Data é obrigatória",
+        "required": "Este campo é obrigatório"
+      },
+      "saveDraft": "Salvar",
+      "cancelDraft": "Cancelar",
+      "addSpending": "Adicionar gasto"
+    },
+    "toast": {
+      "deleted": "Gasto excluído.",
+      "undo": "Desfazer",
+      "updateError": {
+        "message": "Algumas alterações não foram salvas.",
+        "dismiss": "Dispensar"
+      }
+    }
+  }
+}

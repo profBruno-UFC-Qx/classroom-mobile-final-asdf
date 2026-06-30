@@ -1,0 +1,150 @@
+@use '../../../styles/tokens' as t;
+@use '../../../styles/breakpoints' as bp;
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 t.$sp-4;
+  height: 5rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  @include bp.respond-to(md) {
+    padding: 0 t.$sp-8;
+  }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: t.$sp-3;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: t.$sp-3;
+}
+
+.brand {
+  font-size: t.$font-3xl;
+  font-weight: 700;
+  color: t.$color-primary;
+  letter-spacing: -0.025em;
+}
+
+.menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: transparent;
+  border: none;
+  border-radius: t.$radius-sm;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: var(--bg-page);
+    color: var(--text-base);
+  }
+
+  &:focus-visible {
+    outline: 2px solid t.$color-primary;
+    outline-offset: 2px;
+  }
+}
+
+.menu-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.lang-selector {
+  padding: t.$sp-1 t.$sp-2;
+  border: 1px solid var(--border-input);
+  border-radius: t.$radius-sm;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: t.$font-sm;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: t.$color-primary;
+    box-shadow: 0 0 0 3px t.$color-primary-ring;
+  }
+}
+
+.user-menu-wrapper {
+  position: relative;
+}
+
+.avatar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, t.$color-primary 15%, transparent);
+  color: t.$color-primary;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: color-mix(in srgb, t.$color-primary 25%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid t.$color-primary;
+    outline-offset: 2px;
+  }
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + t.$sp-2);
+  right: 0;
+  min-width: 9rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: t.$radius-md;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.logout-btn {
+  display: block;
+  width: 100%;
+  padding: t.$sp-3 t.$sp-4;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: t.$font-sm;
+  font-family: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: t.$color-red-50;
+    color: t.$color-red-600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid t.$color-red-600;
+    outline-offset: -2px;
+  }
+}

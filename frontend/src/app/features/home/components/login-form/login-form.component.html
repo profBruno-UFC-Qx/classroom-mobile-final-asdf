@@ -1,0 +1,50 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+  <div class="field">
+    <label for="email">{{ 'home.form.email.label' | translate }}</label>
+    <input
+      id="email"
+      type="email"
+      formControlName="email"
+      autocomplete="email"
+      data-cy="email-input"
+      [placeholder]="'home.form.email.placeholder' | translate"
+    />
+    @if (form.controls.email.invalid && form.controls.email.touched) {
+      <span class="field-error">
+        @if (form.controls.email.errors?.['required']) {
+          {{ 'home.form.email.required' | translate }}
+        } @else {
+          {{ 'home.form.email.invalid' | translate }}
+        }
+      </span>
+    }
+  </div>
+
+  <div class="field">
+    <label for="password">{{ 'home.form.password.label' | translate }}</label>
+    <input
+      id="password"
+      type="password"
+      formControlName="password"
+      autocomplete="current-password"
+      data-cy="password-input"
+    />
+    @if (form.controls.password.invalid && form.controls.password.touched) {
+      <span class="field-error">
+        @if (form.controls.password.errors?.['required']) {
+          {{ 'home.form.password.required' | translate }}
+        } @else {
+          {{ 'home.form.password.minLength' | translate }}
+        }
+      </span>
+    }
+  </div>
+
+  @if (error) {
+    <div class="form-error" role="alert">{{ error }}</div>
+  }
+
+  <button type="submit" [disabled]="isLoading || form.invalid" class="submit-btn" data-cy="login-submit">
+    {{ (isLoading ? 'home.form.submitting' : 'home.form.submit') | translate }}
+  </button>
+</form>

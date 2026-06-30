@@ -1,0 +1,83 @@
+@use '../../../../../styles/tokens' as t;
+@use '../../../../../styles/breakpoints' as bp;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: t.$sp-5;
+  padding: t.$sp-6;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: t.$radius-lg;
+}
+
+.form__title {
+  margin: 0;
+  font-size: t.$font-lg;
+  font-weight: 600;
+  color: var(--text-base);
+}
+
+.form__fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: t.$sp-5;
+
+  @include bp.respond-to(md) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  input {
+    padding: 0.625rem t.$sp-3;
+    border: 1px solid var(--border-input);
+    border-radius: t.$radius-md;
+    font-size: t.$font-base;
+    background: var(--bg-surface);
+    color: var(--text-base);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: t.$color-primary;
+      box-shadow: 0 0 0 3px t.$color-primary-ring;
+    }
+  }
+}
+
+.submit-btn {
+  align-self: flex-start;
+  padding: 0.625rem t.$sp-6;
+  background: t.$color-primary;
+  color: t.$color-white;
+  border: none;
+  border-radius: t.$radius-md;
+  font-size: t.$font-base;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+
+  @include bp.respond-to(md) {
+    align-self: flex-end;
+  }
+
+  &:hover:not(:disabled) {
+    background: t.$color-primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
