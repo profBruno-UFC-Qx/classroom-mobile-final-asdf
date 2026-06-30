@@ -216,24 +216,69 @@ class HomeViewModelTest {
         }
 
     @Test
-    fun `undoDelete emits undo event with spending id`() =
+    fun `undoDelete clears pendingDeleteId`() =
         runTest(mainDispatcherRule.dispatcher.scheduler) {
             api.listHandler = { ApiEnvelope(listOf(dto("s1"))) }
             val vm = HomeViewModel(repo)
             advanceUntilIdle()
             vm.deleteSpending("s1")
             runCurrent()
-
-            var undoneId: String? = null
-            val job = launch { undoneId = vm.undoEvents.first() }
-            runCurrent() // activate collector before emitting
+            assertEquals("s1", vm.ui.value.pendingDeleteId)
 
             vm.undoDelete()
             runCurrent()
-            job.cancel()
 
-            assertEquals("s1", undoneId)
             assertNull(vm.ui.value.pendingDeleteId)
+        }
+
+    // Regression: previously, undo silently broke after the first cycle because
+    // a SharedFlow collector died on the first reset() CancellationException.
+    @Test
+    fun `pendingDeleteId cycles correctly through three delete-undo pairs`() =
+        runTest(mainDispatcherRule.dispatcher.scheduler) {
+            api.listHandler = { ApiEnvelope(listOf(dto("s1"))) }
+            val vm = HomeViewModel(repo)
+            advanceUntilIdle()
+            val deleteCallsBefore = api.deleteCalls.size
+
+            repeat(3) {
+                vm.deleteSpending("s1")
+                runCurrent()
+                assertEquals("s1", vm.ui.value.pendingDeleteId)
+
+                vm.undoDelete()
+                runCurrent()
+                assertNull(vm.ui.value.pendingDeleteId)
+            }
+
+            // None of the cycles should have committed to the repo
+            assertEquals(deleteCallsBefore, api.deleteCalls.size)
+        }
+
+    // Regression: confirms the 4 s timer still fires on a delete that follows
+    // an undo (the prior bug left the screen visually stuck, but the
+    // underlying ViewModel state must still progress).
+    @Test
+    fun `second delete after undo still commits to repo after 4 seconds`() =
+        runTest(mainDispatcherRule.dispatcher.scheduler) {
+            api.listHandler = { ApiEnvelope(listOf(dto("s1"))) }
+            val vm = HomeViewModel(repo)
+            advanceUntilIdle()
+            val deleteCallsBefore = api.deleteCalls.size
+
+            vm.deleteSpending("s1")
+            runCurrent()
+            vm.undoDelete()
+            advanceTimeBy(5_000)
+            assertEquals(deleteCallsBefore, api.deleteCalls.size)
+
+            vm.deleteSpending("s1")
+            runCurrent()
+            advanceTimeBy(4_001)
+            runCurrent()
+
+            assertEquals(deleteCallsBefore + 1, api.deleteCalls.size)
+            assertEquals("s1", api.deleteCalls.last())
         }
 
     @Test
