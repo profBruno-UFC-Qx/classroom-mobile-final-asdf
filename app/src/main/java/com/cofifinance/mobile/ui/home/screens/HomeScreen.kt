@@ -31,6 +31,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -101,51 +102,46 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(state.spendings, key = { it.id }) { spending ->
-                            val dismissState = rememberSwipeToDismissBoxState(
-                                confirmValueChange = { value ->
-                                    if (value == SwipeToDismissBoxValue.EndToStart) {
-                                        vm.deleteSpending(spending.id)
-                                        true
-                                    } else false
-                                }
-                            )
-
-                            // Reset is keyed on the StateFlow transition (delete ↔ undo),
-                            // so each cycle gets a fresh coroutine that cannot be
-                            // permanently killed by a prior animation's CancellationException.
                             val isDismissed = state.pendingDeleteId == spending.id
-                            LaunchedEffect(isDismissed) {
-                                if (!isDismissed &&
-                                    dismissState.currentValue != SwipeToDismissBoxValue.Settled
-                                ) {
-                                    dismissState.reset()
-                                }
-                            }
-
-                            SwipeToDismissBox(
-                                state = dismissState,
-                                enableDismissFromStartToEnd = false,
-                                backgroundContent = {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(CardDefaults.shape)
-                                            .background(MaterialTheme.colorScheme.error),
-                                        contentAlignment = Alignment.CenterEnd,
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Delete",
-                                            tint = MaterialTheme.colorScheme.onError,
-                                            modifier = Modifier.padding(end = 24.dp),
-                                        )
+                            // Re-key composition on each delete↔undo flip so the
+                            // SwipeToDismissBoxState is rebuilt fresh every cycle.
+                            // Without this, AnchoredDraggable retains stale internal
+                            // anchors after the first reset and the second swipe is ignored.
+                            key(spending.id, isDismissed) {
+                                val dismissState = rememberSwipeToDismissBoxState(
+                                    confirmValueChange = { value ->
+                                        if (value == SwipeToDismissBoxValue.EndToStart) {
+                                            vm.deleteSpending(spending.id)
+                                            true
+                                        } else false
                                     }
-                                },
-                            ) {
-                                SpendingItem(
-                                    spending = spending,
-                                    onClick = { onNavigateToEdit(spending.id) },
                                 )
+
+                                SwipeToDismissBox(
+                                    state = dismissState,
+                                    enableDismissFromStartToEnd = false,
+                                    backgroundContent = {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .clip(CardDefaults.shape)
+                                                .background(MaterialTheme.colorScheme.error),
+                                            contentAlignment = Alignment.CenterEnd,
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "Delete",
+                                                tint = MaterialTheme.colorScheme.onError,
+                                                modifier = Modifier.padding(end = 24.dp),
+                                            )
+                                        }
+                                    },
+                                ) {
+                                    SpendingItem(
+                                        spending = spending,
+                                        onClick = { onNavigateToEdit(spending.id) },
+                                    )
+                                }
                             }
                         }
                     }
