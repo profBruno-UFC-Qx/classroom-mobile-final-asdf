@@ -1,0 +1,273 @@
+package com.cofifinance.mobile.ui.home.screens
+
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
+import androidx.compose.ui.test.swipeLeft
+import com.cofifinance.mobile.data.local.dao.SpendingDao
+import com.cofifinance.mobile.data.local.entity.SpendingEntity
+import com.cofifinance.mobile.data.local.entity.SyncStatus
+import com.cofifinance.mobile.data.remote.dto.ApiEnvelope
+import com.cofifinance.mobile.data.remote.dto.SpendingDto
+import com.cofifinance.mobile.data.repository.SpendingRepository
+import com.cofifinance.mobile.support.FakeSpendingApiService
+import com.cofifinance.mobile.support.FakeSpendingDao
+import com.cofifinance.mobile.ui.home.viewmodel.HomeViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
+import org.junit.Rule
+import org.junit.Test
+
+class HomeScreenTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    // ── Empty / loading states ────────────────────────────────────────────────
+
+    @Test
+    fun empty_list_shows_no_spendings_message() {
+        val vm = vm()
+
+        composeRule.setContent {
+            HomeScreen(onNavigateToCreate = {}, onNavigateToEdit = {}, vm = vm)
+        }
+
+        composeRule.waitUntil(5_000) { !vm.ui.value.isLoading }
+        composeRule.onNodeWithText("No spendings yet").assertIsDisplayed()
+    }
+
+    @Test
+    fun spending_items_are_shown_when_list_is_non_empty() {
+        val api = FakeSpendingApiService().apply {
+            listHandler = { ApiEnvelope(listOf(dto("s1", "Afternoon Coffee"))) }
+        }
+        val vm = vm(api = api)
+
+        composeRule.setContent {
+            HomeScreen(onNavigateToCreate = {}, onNavigateToEdit = {}, vm = vm)
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Afternoon Coffee").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Afternoon Coffee").assertIsDisplayed()
+    }
+
+    @Test
+    fun error_message_is_shown_when_sync_fails() {
+        // Note: SpendingRepository.pull() swallows API errors (offline-first design),
+        // so the only path that surfaces an error to the UI is a DAO failure that
+        // escapes runCatching in sync().
+        val vm = HomeViewModel(SpendingRepository(FakeSpendingApiService(), throwingDao()))
+
+        composeRule.setContent {
+            HomeScreen(onNavigateToCreate = {}, onNavigateToEdit = {}, vm = vm)
+        }
+
+        composeRule.waitUntil(5_000) { !vm.ui.value.isLoading }
+        composeRule.onNodeWithText("Could not sync spendings").assertIsDisplayed()
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+
+    @Test
+    fun fab_invokes_onNavigateToCreate() {
+        var createCalled = false
+        val vm = vm()
+
+        composeRule.setContent {
+            HomeScreen(
+                onNavigateToCreate = { createCalled = true },
+                onNavigateToEdit = {},
+                vm = vm,
+            )
+        }
+
+        composeRule.onNodeWithContentDescription("Add spending").performClick()
+
+        composeRule.waitUntil(5_000) { createCalled }
+    }
+
+    @Test
+    fun clicking_spending_item_invokes_onNavigateToEdit_with_correct_id() {
+        var editId: String? = null
+        val api = FakeSpendingApiService().apply {
+            listHandler = { ApiEnvelope(listOf(dto("s1", "Tea"))) }
+        }
+        val vm = vm(api = api)
+
+        composeRule.setContent {
+            HomeScreen(
+                onNavigateToCreate = {},
+                onNavigateToEdit = { editId = it },
+                vm = vm,
+            )
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Tea").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Tea").performClick()
+
+        composeRule.waitUntil(5_000) { editId != null }
+        assert(editId == "s1")
+    }
+
+    // ── Pull-to-refresh ───────────────────────────────────────────────────────
+
+    @Test
+    fun pull_to_refresh_triggers_sync() {
+        val api = FakeSpendingApiService().apply {
+            listHandler = { ApiEnvelope(listOf(dto("s1", "Coffee"))) }
+        }
+        val vm = vm(api = api)
+
+        composeRule.setContent {
+            HomeScreen(onNavigateToCreate = {}, onNavigateToEdit = {}, vm = vm)
+        }
+
+        // Wait for the row to be on screen so we can swipe down on it.
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Coffee").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        val callsBefore = api.listCalls.size
+
+        // Long pull from the top of the row to exceed PullToRefreshBox's threshold.
+        composeRule.onNodeWithText("Coffee").performTouchInput {
+            swipe(
+                start = Offset(centerX, top + 10f),
+                end = Offset(centerX, top + 800f),
+                durationMillis = 500,
+            )
+        }
+
+        composeRule.waitUntil(5_000) { api.listCalls.size > callsBefore }
+    }
+
+    @Test
+    fun pull_to_refresh_updates_spendings_from_backend() {
+        var serveNewItem = false
+        val api = FakeSpendingApiService().apply {
+            listHandler = {
+                if (serveNewItem) ApiEnvelope(listOf(dto("s1", "Coffee"), dto("s2", "New Item")))
+                else ApiEnvelope(listOf(dto("s1", "Coffee")))
+            }
+        }
+        val vm = vm(api = api)
+
+        composeRule.setContent {
+            HomeScreen(onNavigateToCreate = {}, onNavigateToEdit = {}, vm = vm)
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Coffee").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        serveNewItem = true
+        composeRule.onNodeWithText("Coffee").performTouchInput {
+            swipe(
+                start = Offset(centerX, top + 10f),
+                end = Offset(centerX, top + 800f),
+                durationMillis = 500,
+            )
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("New Item").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("New Item").assertIsDisplayed()
+    }
+
+    // ── Swipe-to-delete + undo ────────────────────────────────────────────────
+
+    // Regression: previously, after one delete+undo cycle the second swipe on
+    // the SAME row did nothing because the SwipeToDismissBoxState retained
+    // stale internal anchored-draggable state.
+    @Test
+    fun delete_undo_delete_undo_works_on_the_same_row() {
+        val api = FakeSpendingApiService().apply {
+            listHandler = { ApiEnvelope(listOf(dto("s1", "Coffee"))) }
+        }
+        val vm = vm(api = api)
+
+        composeRule.setContent {
+            HomeScreen(onNavigateToCreate = {}, onNavigateToEdit = {}, vm = vm)
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Coffee").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // ── First cycle: delete → undo
+        composeRule.onNodeWithText("Coffee").performTouchInput { swipeLeft() }
+        composeRule.waitUntil(5_000) { vm.ui.value.pendingDeleteId == "s1" }
+        composeRule.onNodeWithText("Undo").performClick()
+        composeRule.waitUntil(5_000) { vm.ui.value.pendingDeleteId == null }
+
+        // ── Second cycle on the SAME row: this is the regression
+        composeRule.onNodeWithText("Coffee").performTouchInput { swipeLeft() }
+        composeRule.waitUntil(5_000) { vm.ui.value.pendingDeleteId == "s1" }
+        composeRule.onNodeWithText("Undo").performClick()
+        composeRule.waitUntil(5_000) { vm.ui.value.pendingDeleteId == null }
+    }
+
+    // ── helpers ───────────────────────────────────────────────────────────────
+
+    private fun vm(
+        api: FakeSpendingApiService = FakeSpendingApiService(),
+        seed: SpendingEntity? = null,
+    ): HomeViewModel {
+        val dao = FakeSpendingDao()
+        if (seed != null) runBlocking { dao.upsert(seed) }
+        return HomeViewModel(SpendingRepository(api, dao))
+    }
+
+    private fun throwingDao(): SpendingDao = object : SpendingDao {
+        override fun getAllFlow(): Flow<List<SpendingEntity>> = MutableStateFlow(emptyList())
+        override suspend fun getAll(): List<SpendingEntity> = emptyList()
+        override suspend fun getById(id: String): SpendingEntity? = null
+        override suspend fun getPending(): List<SpendingEntity> = error("dao failure")
+        override suspend fun upsert(entity: SpendingEntity) {}
+        override suspend fun upsertAll(entities: List<SpendingEntity>) {}
+        override suspend fun deleteById(id: String) {}
+        override suspend fun deleteByIds(ids: List<String>) {}
+        override suspend fun updateSyncStatus(id: String, status: SyncStatus) {}
+    }
+
+    private fun dto(id: String, name: String) = SpendingDto(
+        id = id,
+        userId = 1L,
+        name = name,
+        category = "Food",
+        price = 5.0,
+        observation = null,
+        spentAt = "2026-01-01T00:00:00Z",
+        orderNumber = 1,
+        createdAt = "2026-01-01T00:00:00Z",
+        updatedAt = "2026-01-01T00:00:00Z",
+    )
+
+    @Suppress("SameParameterValue")
+    private fun entity(id: String, name: String) = SpendingEntity(
+        id = id,
+        userId = 1L,
+        name = name,
+        category = "Food",
+        price = 5.0,
+        observation = null,
+        spentAt = "2026-01-01T00:00:00Z",
+        orderNumber = 1,
+        createdAt = "2026-01-01T00:00:00Z",
+        updatedAt = "2026-01-01T00:00:00Z",
+        syncStatus = SyncStatus.SYNCED,
+    )
+}

@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Cofi Finance Mobile</string>
+
+    <string name="login_title">Sign in</string>
+    <string name="login_subtitle">Welcome back to Cofi Finance</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_submit">Sign in</string>
+    <string name="login_create_account">Create account</string>
+    <string name="login_error_email_blank">Email is required</string>
+    <string name="login_error_password_short">Password must be at least 8 characters</string>
+    <string name="login_error_invalid_credentials">Invalid email or password</string>
+    <string name="login_error_email_not_verified">Please verify your email before signing in</string>
+    <string name="login_error_generic">Could not sign in. Please try again</string>
+
+    <string name="home_title">You are signed in</string>
+    <string name="home_subtitle">Spending dashboard coming soon</string>
+
+    <string name="register_title">Create account</string>
+    <string name="register_subtitle">Coming soon</string>
+</resources>
